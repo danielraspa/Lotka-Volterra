@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <limits>
+#include <SFML/Graphics.hpp>
 
 
 #include "simulation.hpp"
@@ -37,7 +38,7 @@ int main() {
               << "- compute an evolution of delta t in seconds[t val] (choose for stability a value of the order of 0.001) \n" //da implementare - ok
               << "- print on screen the evolutions [p] \n" //da implementare - ok
               << "- save the evolutions in an output file [s] \n" //da implementare -ok
-              << "- draw the orbit of the evolution [d value] \n" //da implementare
+              << "- draw the orbit of the evolution [d val] \n" //da implementare
               << "- draw the x, y and H trends [g val] \n" //da implementare
               << "- quit [q] \n";
 
@@ -74,6 +75,51 @@ int main() {
         outfile.close();
 
         std::cout << "Evolutions have been written in the evolution.txt file." << '\n';
+      } else if (cmd == 'g' && std::cin >> delta_t) {
+        sf::RenderWindow window(sf::VideoMode(800, 600), "Simulation Graph"); //creazione finestra 
+
+        sf::VertexArray axes (sf::Lines, 4);
+        sf::VertexArray prey_graph(sf::LineStrip); //LineStrip -> List of connected lines, a point uses the previous point to form a line.
+        sf::VertexArray predator_graph(sf::LineStrip);
+        sf::VertexArray const_of_motion_graph(sf::LineStrip);
+
+        axes[0] = sf::Vertex(sf::Vector2f(50, 550), sf::Color::Black); //begin of x-axis
+        axes[1] = sf::Vertex(sf::Vector2f(750, 550), sf::Color::Black); //end of x-axis
+        axes[2] = sf::Vertex(sf::Vector2f(50, 550), sf::Color::Black); //begin of y-axis
+        axes[3] = sf::Vertex(sf::Vector2f(50, 50), sf::Color::Black); //end of y-axis
+
+        float t{0}; //Vector2f needs float
+        float x_axis_offset{50}; //to fix the x offset in SFML's window
+        float y_axis_offset{550}; //to fix the y offset in SFML's window
+
+        while (window.isOpen())
+        {
+          sf::Event event; //define a system event and its parameter
+
+          while (window.pollEvent(event)) {
+            if (event.type == sf::Event::Closed) {
+            window.close();
+            }
+          }
+
+          m_species_state.evolve(delta_t);
+
+          prey_graph.append(sf::Vertex(sf::Vector2f((t + static_cast<float>(delta_t)) + x_axis_offset, - (static_cast<float>(m_species_state.back().x) - y_axis_offset)), sf::Color::Blue)); //- to flip the y-axis
+          predator_graph.append(sf::Vertex(sf::Vector2f((t + static_cast<float>(delta_t)) + x_axis_offset, - (static_cast<float>(m_species_state.back().y) - y_axis_offset)), sf::Color::Red));
+          const_of_motion_graph.append(sf::Vertex(sf::Vector2f((t + static_cast<float>(delta_t)) + x_axis_offset, - (static_cast<float>(m_species_state.back().H) - y_axis_offset)), sf::Color::Magenta));
+
+          t += static_cast<float>(delta_t);
+
+          window.clear(sf::Color::White);
+
+          window.draw(axes);
+          window.draw(prey_graph);
+          window.draw(predator_graph);
+          window.draw(const_of_motion_graph);
+
+          window.display();
+        }
+        
       } else if(cmd == 'q') {
         return EXIT_SUCCESS;
       }     

@@ -22,22 +22,21 @@ string(APPEND CMAKE_EXE_LINKER_FLAGS_DEBUG " -fsanitize=address,undefined -fno-o
 
 # richiedi il componente graphics della libreria SFML, versione 2.5
 #   le dipendenze vengono identificate automaticamente
-#find_package(SFML 2.5 COMPONENTS graphics REQUIRED)
+find_package(SFML 2.5 COMPONENTS graphics REQUIRED)
 
-#add_executable(mandelbrot main_sfml.cpp image.cpp mandelbrot.cpp)
-#target_link_libraries(mandelbrot PRIVATE sfml-graphics)
+#add_executable(simulationgraph main.cpp species.cpp simulation.cpp)
+#target_link_libraries(simulationgraph PRIVATE sfml-graphics)
+add_executable(simulation main.cpp species.cpp simulation.cpp)
+target_link_libraries(simulation PRIVATE sfml-graphics)
 
 # se il testing e' abilitato...
 #   per disabilitare il testing, passare -DBUILD_TESTING=OFF a cmake durante la fase di configurazione
 if (BUILD_TESTING)
 
   # aggiungi l'eseguibile all.t
-  # add_executable(all.t all.t.cpp complex.t.cpp)
   add_executable(simulation.t species.cpp simulation.cpp simulation.test.cpp)
-  add_executable(simulation main.cpp species.cpp simulation.cpp)
 
   # aggiungi l'eseguibile all.t alla lista dei test
-  # add_test(NAME all.t COMMAND all.t)
   add_test(simulation.t COMMAND simulation.t)
 
 endif()
